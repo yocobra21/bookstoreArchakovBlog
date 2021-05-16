@@ -1,25 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios'
+import React from 'react'
+import { connect } from 'react-redux'
+import { setBooks } from './actions/books'
 
-function App() {
+import { Menu } from './components'
+import { BookCard } from './components'
+import { Container } from 'semantic-ui-react'
+import { Card } from 'semantic-ui-react'
+
+function App({ isReady, books, setBooks }) {
+
+  React.useEffect(() => {
+    axios.get('/books.json')
+      .then(({ data }) => {
+        setBooks(data)
+      })
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <Container>
+        <Menu />
+
+        <Card.Group itemsPerRow={4}>
+
+            {
+              !isReady ? 'Loading' : books.map(item => (
+               <BookCard {...item} />
+              ))
+            }
+
+        </Card.Group>
+
+
+      </Container>
+
+
+
+    </>
+  )
 }
 
-export default App;
+const mapStateToProps = ({ books }) => ({
+  books: books.items,
+  isReady: books.isReady
+})
+
+const mapDispatchToProps = dispatch => ({
+  setBooks: books => dispatch(setBooks(books))
+})
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
